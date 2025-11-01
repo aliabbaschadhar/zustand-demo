@@ -5,16 +5,16 @@ import { useHabitStore } from "../store/store";
 export const AddHabitForm = () => {
   const [name, setName] = useState("");
   const [frequency, setFrequency] = useState<"daily" | "weekly">("daily");
-  const { habits, addHabits } = useHabitStore();
+  const { habits, addHabit } = useHabitStore();
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      addHabits(name, frequency);
-      console.log(habits)
+      addHabit(name, frequency);
       setName("");
     }
+    console.log(useHabitStore.getState().habits)
   }
 
   return <form onSubmit={handleSubmit}>

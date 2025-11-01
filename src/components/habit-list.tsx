@@ -1,6 +1,50 @@
+import { Box, Paper, Button, Stack } from "@mui/material"
+import { useHabitStore } from "../store/store"
 
 export const HabitList = () => {
+  const { habits, removeHabit, toggleHabit } = useHabitStore();
+  const today = new Date().toISOString().split('T')[0];
+
   return (
-    <div>HabitList</div>
+    <Box sx={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+      gap: 2,
+      mt: 4
+    }}>
+      {habits.map((habit) => {
+        const isCompletedToday = habit.completedDates.includes(today);
+        return (
+          <Paper key={habit.id} elevation={2} sx={{ p: 2 }}>
+            <Box sx={{ mb: 2 }}>
+              <h3 style={{
+                textDecoration: isCompletedToday ? 'line-through' : 'none',
+                opacity: isCompletedToday ? 0.6 : 1
+              }}>
+                {habit.name}
+              </h3>
+            </Box>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                color={isCompletedToday ? "warning" : "success"}
+                size="small"
+                onClick={() => toggleHabit(habit.id, today)}
+              >
+                {isCompletedToday ? "Undo" : "Mark Complete"}
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                size="small"
+                onClick={() => removeHabit(habit.id)}
+              >
+                Remove
+              </Button>
+            </Stack>
+          </Paper>
+        );
+      })}
+    </Box>
   )
 }
