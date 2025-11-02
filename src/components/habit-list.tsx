@@ -1,9 +1,34 @@
-import { Box, Paper, Button, Stack } from "@mui/material"
+import { Box, Paper, Button, Stack, Typography, LinearProgress } from "@mui/material"
 import { useHabitStore } from "../store/store"
 
 export const HabitList = () => {
   const { habits, removeHabit, toggleHabit } = useHabitStore();
   const today = new Date().toISOString().split('T')[0];
+
+  const calculateStreak = (completedDates: string[]) => {
+    if (completedDates.length === 0) return 0;
+
+    let streak = 0;
+    const sortedDates = completedDates.sort().reverse();
+    const todayDate = new Date(today);
+
+    for (let i = 0; i < sortedDates.length; i++) {
+      const currentDate = new Date(sortedDates[i]);
+      const expectedDate = new Date(todayDate);
+      expectedDate.setDate(expectedDate.getDate() - i);
+
+      if (currentDate.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const totalStreak = habits.reduce((max, habit) => {
+    return Math.max(max, calculateStreak(habit.completedDates));
+  }, 0);
 
   return (
     <Box sx={{
@@ -45,6 +70,13 @@ export const HabitList = () => {
           </Paper>
         );
       })}
+      <Box sx={{ mt: 2, gridColumn: "1 / -1" }}>
+        <Typography>🔥 Current Streak: <strong>{totalStreak}</strong> day{totalStreak !== 1 ? 's' : ''}</Typography>
+        <LinearProgress
+          variant="determinate"
+          value={Math.min(totalStreak * 10, 100)}
+        />
+      </Box>
     </Box>
   )
 }
