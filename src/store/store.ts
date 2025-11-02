@@ -14,15 +14,20 @@ interface HabitState {
   habits: Habit[],
   addHabit: (name: string, frequency: "daily" | "weekly") => void,
   removeHabit: (id: string) => void,
-  toggleHabit: (id: string, date: string) => void
+  toggleHabit: (id: string, date: string) => void,
+  fetchHabits: () => Promise<void>,
+  isLoading: boolean,
+  error: string | null,
 }
 
 export const useHabitStore = create<HabitState>()(
   devtools(
     persist(
-      (set) => {
+      (set, get) => {
         return {
-          habits: [],
+          habits: [] as Habit[],
+          isLoading: false,
+          error: null,
           addHabit: (name, frequency) => set((state) => {
             return {
               habits: [
@@ -50,7 +55,38 @@ export const useHabitStore = create<HabitState>()(
                 }
                 : habit
             )
-          }))
+          })),
+          fetchHabits: async () => {
+            set({ isLoading: true });
+            try {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              const earlyHabits = get().habits;
+              const mockHabits: Habit[] = [
+                {
+                  id: "1",
+                  name: "Exercise",
+                  frequency: "daily",
+                  completedDates: [],
+                  createdAt: new Date().toISOString()
+                },
+                {
+                  id: "2",
+                  name: "Read a book",
+                  frequency: "weekly",
+                  completedDates: [],
+                  createdAt: new Date().toISOString()
+                }
+              ];
+              if (earlyHabits.length > 0) {
+                set({ habits: earlyHabits, isLoading: false, error: null });
+              } else {
+                set({ habits: mockHabits, isLoading: false, error: null });
+              }
+
+            } catch (error) {
+              set({ isLoading: false, error: "Failed to fetch Habits: " + error });
+            }
+          }
         }
       },
       {

@@ -1,9 +1,17 @@
-import { Box, Paper, Button, Stack, Typography, LinearProgress } from "@mui/material"
+import { Box, Paper, Stack, Typography, LinearProgress, IconButton, Tooltip } from "@mui/material"
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import UndoIcon from '@mui/icons-material/Undo';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { useEffect } from "react";
 import { useHabitStore } from "../store/store"
 
 export const HabitList = () => {
-  const { habits, removeHabit, toggleHabit } = useHabitStore();
+  const { habits, removeHabit, toggleHabit, fetchHabits } = useHabitStore();
   const today = new Date().toISOString().split('T')[0];
+
+  useEffect(() => {
+    fetchHabits();
+  }, [fetchHabits]);
 
   const calculateStreak = (completedDates: string[]) => {
     if (completedDates.length === 0) return 0;
@@ -23,6 +31,7 @@ export const HabitList = () => {
         break;
       }
     }
+
     return streak;
   };
 
@@ -50,22 +59,47 @@ export const HabitList = () => {
               </h3>
             </Box>
             <Stack direction="row" spacing={1}>
-              <Button
-                variant="contained"
-                color={isCompletedToday ? "warning" : "success"}
-                size="small"
-                onClick={() => toggleHabit(habit.id, today)}
-              >
-                {isCompletedToday ? "Undo" : "Mark Complete"}
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                size="small"
-                onClick={() => removeHabit(habit.id)}
-              >
-                Remove
-              </Button>
+              <Tooltip title={isCompletedToday ? "Undo" : "Mark Complete"}>
+                <Stack
+                  direction="column"
+                  alignItems="center"
+                  spacing={0.5}
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => toggleHabit(habit.id, today)}
+                >
+                  <IconButton
+                    color={isCompletedToday ? "warning" : "success"}
+                    size="small"
+                    aria-label={isCompletedToday ? "undo" : "mark complete"}
+                  >
+                    {isCompletedToday ? <UndoIcon /> : <CheckCircleOutlineIcon />}
+                  </IconButton>
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                    {isCompletedToday ? "Undo" : "Mark Done"}
+                  </Typography>
+                </Stack>
+              </Tooltip>
+
+              <Tooltip title="Remove">
+                <Stack
+                  direction="column"
+                  alignItems="center"
+                  spacing={0.5}
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => removeHabit(habit.id)}
+                >
+                  <IconButton
+                    color="error"
+                    size="small"
+                    aria-label="remove"
+                  >
+                    <DeleteOutlineIcon />
+                  </IconButton>
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                    Remove
+                  </Typography>
+                </Stack>
+              </Tooltip>
             </Stack>
           </Paper>
         );
